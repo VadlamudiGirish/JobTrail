@@ -6,7 +6,7 @@
     "prisma:generate": "prisma generate",
     "prepare": "npm run prisma:generate",
     "dev": "npm run prisma:generate && next dev",
-    "build": "npm run prisma:generate && prisma db push && next build",
+    "build": "npm run prisma:generate && next build",
     "start": "npm run prisma:generate && next start",
     "lint": "next lint"
   },
