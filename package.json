@@ -11,6 +11,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
+    "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.9.0",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
