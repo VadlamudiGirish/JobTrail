@@ -25,6 +25,13 @@ model User {
   applications  Application[]
 }
 
+enum PLATFORM {
+  LINKEDIN
+  INDEED
+  GLASSDOOR
+  RECOMMENDATION
+  OTHER
+}
 model Application {
   id                String   @id @default(cuid())
   applicationDate   DateTime
@@ -33,6 +40,7 @@ model Application {
   applicationMethod String
   applicationStatus String
   contactPerson     String
+  platform          PLATFORM
   notes             String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
