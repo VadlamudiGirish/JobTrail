@@ -32,9 +32,7 @@ export default function RootLayout({
       >
         <AuthSessionProvider>
           <Header />
-          <main className="flex-1 container mx-auto px-4 pt-20">
-            {children}
-          </main>
+          <main className="flex-1 container mx-auto px-4 ">{children}</main>
           <Footer />
         </AuthSessionProvider>
       </body>
