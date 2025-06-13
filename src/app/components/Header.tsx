@@ -4,23 +4,22 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import LanguageSwitcher from "./LanguageSwitcher";
 
-const navigation = [
-  { name: "Home", href: "/en" },
-  { name: "Applications", href: "/en/applications" },
-];
-
-const mockUser = {
-  name: "Girish VAdlamudi", // Replace with dynamic user later
-  loggedIn: true, // Toggle this for now
-};
-
 export default function Header() {
+  const { data: session } = useSession();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const locale = pathname.split("/")[1] || "en";
+
+  const navigation = [
+    { name: "Home", href: `/${locale}` },
+    { name: "Applications", href: `/${locale}/applications` },
+  ];
 
   const isActive = (href: string) => pathname === href;
 
@@ -31,7 +30,7 @@ export default function Header() {
         className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
       >
         <div className="flex items-center gap-x-12">
-          <Link href="/" className="-m-1.5 p-1.5">
+          <div className="-m-1.5 p-1.5">
             <span className="sr-only">JobTrail</span>
             <Image
               src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
@@ -40,40 +39,45 @@ export default function Header() {
               height={40}
               className="h-8 w-auto"
             />
-          </Link>
-
-          <div className="hidden lg:flex lg:gap-x-12">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`text-sm font-semibold ${
-                  isActive(item.href)
-                    ? "text-orange-600 underline underline-offset-4"
-                    : "text-gray-900"
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
           </div>
+
+          {session?.user && (
+            <div className="hidden lg:flex lg:gap-x-12">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`text-sm font-semibold ${
+                    isActive(item.href)
+                      ? "text-orange-600 underline underline-offset-4"
+                      : "text-gray-900"
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="hidden lg:flex items-center gap-x-6">
           <LanguageSwitcher />
-          {mockUser.loggedIn ? (
+          {session?.user && (
             <>
               <span className="text-sm font-medium text-gray-700">
-                {mockUser.name}
+                {session.user.name}
               </span>
-              <button className="text-sm font-semibold text-orange-600 hover:underline">
-                Logout &rarr;
+              <button
+                onClick={() => signOut()}
+                className="text-sm font-semibold text-orange-600 hover:underline"
+              >
+                Logout
               </button>
             </>
-          ) : null}
+          )}
         </div>
 
-        {/* Mobile button */}
+        {/* Mobile toggle */}
         <div className="flex lg:hidden">
           <button
             type="button"
@@ -86,7 +90,7 @@ export default function Header() {
         </div>
       </nav>
 
-      {/* Mobile dialog */}
+      {/* Mobile menu */}
       <Dialog
         open={mobileMenuOpen}
         onClose={setMobileMenuOpen}
@@ -95,7 +99,7 @@ export default function Header() {
         <div className="fixed inset-0 z-50" />
         <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
           <div className="flex items-center justify-between">
-            <Link href="/" className="-m-1.5 p-1.5">
+            <div className="-m-1.5 p-1.5">
               <Image
                 src="/jobtrail-logo.png"
                 alt="JobTrail Logo"
@@ -103,7 +107,7 @@ export default function Header() {
                 height={40}
                 className="h-8 w-auto"
               />
-            </Link>
+            </div>
             <button
               type="button"
               onClick={() => setMobileMenuOpen(false)}
@@ -113,31 +117,34 @@ export default function Header() {
               <XMarkIcon aria-hidden="true" className="size-6" />
             </button>
           </div>
-          <div className="mt-6">
-            <div className="-my-6 divide-y divide-gray-500/10">
-              <div className="space-y-2 py-6">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="block rounded-lg px-3 py-2 text-base font-semibold text-gray-900 hover:bg-gray-50"
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-              {mockUser.loggedIn ? (
+          {session?.user && (
+            <div className="mt-6">
+              <div className="-my-6 divide-y divide-gray-500/10">
+                <div className="space-y-2 py-6">
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="block rounded-lg px-3 py-2 text-base font-semibold text-gray-900 hover:bg-gray-50"
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
                 <div className="py-6">
                   <span className="block text-sm mb-2 text-gray-700">
-                    {mockUser.name}
+                    {session.user.name}
                   </span>
-                  <button className="text-sm font-semibold text-orange-600 hover:underline">
-                    Logout &rarr;
+                  <button
+                    onClick={() => signOut()}
+                    className="text-sm font-semibold text-orange-600 hover:underline"
+                  >
+                    Logout
                   </button>
                 </div>
-              ) : null}
+              </div>
             </div>
-          </div>
+          )}
         </DialogPanel>
       </Dialog>
     </header>
