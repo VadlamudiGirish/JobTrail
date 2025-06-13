@@ -6,12 +6,15 @@ import FilterSelect from "@/app/components/FilterSelect";
 import ApplicationRow from "@/app/components/ApplicationRow";
 import { redirect } from "next/navigation";
 
-interface PageProps {
+interface ApplicationsPageProps {
   params: { locale: string };
   searchParams: { status?: string; month?: string };
 }
 
-export default async function ApplicationsPage({ params, searchParams }: PageProps) {
+export default async function ApplicationsPage({
+  params,
+  searchParams,
+}: ApplicationsPageProps) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     redirect("/login");
