@@ -5,6 +5,7 @@ import Button from "@/app/components/Button";
 import FilterSelect from "@/app/components/FilterSelect";
 import ApplicationRow from "@/app/components/ApplicationRow";
 import { redirect } from "next/navigation";
+import type { Prisma } from "@prisma/client";
 
 interface ApplicationsPageProps {
   params: { locale: string };
@@ -20,7 +21,7 @@ export default async function ApplicationsPage({
     redirect("/login");
   }
 
-  const where: any = { userId: session!.user.id };
+  const where: Prisma.ApplicationWhereInput = { userId: session!.user.id };
   if (searchParams.status) {
     where.applicationStatus = searchParams.status;
   }
