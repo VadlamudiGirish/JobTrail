@@ -4,6 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -13,12 +14,8 @@ const navigation = [
   { name: "Applications", href: "/en/applications" },
 ];
 
-const mockUser = {
-  name: "Girish VAdlamudi", // Replace with dynamic user later
-  loggedIn: true, // Toggle this for now
-};
-
 export default function Header() {
+  const { data: session } = useSession();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -61,19 +58,22 @@ export default function Header() {
 
         <div className="hidden lg:flex items-center gap-x-6">
           <LanguageSwitcher />
-          {mockUser.loggedIn ? (
+          {session?.user && (
             <>
               <span className="text-sm font-medium text-gray-700">
-                {mockUser.name}
+                {session.user.name}
               </span>
-              <button className="text-sm font-semibold text-orange-600 hover:underline">
+              <button
+                onClick={() => signOut()}
+                className="text-sm font-semibold text-orange-600 hover:underline"
+              >
                 Logout &rarr;
               </button>
             </>
-          ) : null}
+          )}
         </div>
 
-        {/* Mobile button */}
+        {/* Mobile toggle */}
         <div className="flex lg:hidden">
           <button
             type="button"
@@ -86,7 +86,7 @@ export default function Header() {
         </div>
       </nav>
 
-      {/* Mobile dialog */}
+      {/* Mobile menu */}
       <Dialog
         open={mobileMenuOpen}
         onClose={setMobileMenuOpen}
@@ -126,16 +126,19 @@ export default function Header() {
                   </Link>
                 ))}
               </div>
-              {mockUser.loggedIn ? (
+              {session?.user && (
                 <div className="py-6">
                   <span className="block text-sm mb-2 text-gray-700">
-                    {mockUser.name}
+                    {session.user.name}
                   </span>
-                  <button className="text-sm font-semibold text-orange-600 hover:underline">
+                  <button
+                    onClick={() => signOut()}
+                    className="text-sm font-semibold text-orange-600 hover:underline"
+                  >
                     Logout &rarr;
                   </button>
                 </div>
-              ) : null}
+              )}
             </div>
           </div>
         </DialogPanel>
