@@ -39,10 +39,12 @@ const navigation: NavItem[] = [
 
 export default function Footer() {
   return (
-    <footer className="bg-white fixed bottom-0 left-0 w-full z-40 shadow-sm">
-      <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
-        <p className="text-sm text-gray-600">&copy; 2025, MIT License.</p>
-        <div className="flex gap-x-4">
+    <footer className="bg-white border-t fixed bottom-0 left-0 w-full z-40 shadow-sm">
+      <div className="mx-auto max-w-7xl px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0">
+        <p className="text-sm text-gray-600 text-center sm:text-left">
+          &copy; 2025, MIT License.
+        </p>
+        <div className="flex space-x-4">
           {navigation.map((item) => (
             <a
               key={item.name}
@@ -52,7 +54,7 @@ export default function Footer() {
               rel="noopener noreferrer"
             >
               <span className="sr-only">{item.name}</span>
-              <item.icon aria-hidden="true" className="size-5" />
+              <item.icon aria-hidden="true" className="w-5 h-5" />
             </a>
           ))}
         </div>

@@ -35,6 +35,7 @@ export default function ApplicationForm() {
       interviewRound: 0,
     },
   });
+
   const { locale } = useParams() as { locale: string };
   const router = useRouter();
   const [error, setError] = useState("");
@@ -42,7 +43,7 @@ export default function ApplicationForm() {
   const onSubmit = async (values: ApplicationFormData) => {
     try {
       const dateOnly = new Date(values.applicationDate);
-      dateOnly.setHours(0, 0, 0, 0); // add time
+      dateOnly.setHours(0, 0, 0, 0);
 
       const res = await fetch("/api/applications", {
         method: "POST",
@@ -66,139 +67,114 @@ export default function ApplicationForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-6 max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md"
+      className="space-y-6 w-full max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-xl shadow-md"
     >
-      <div>
-        <label className="block font-medium mb-1">Job Title</label>
-        <input
-          {...register("jobTitle")}
-          className="w-full p-3 border rounded-md"
-        />
-        {errors.jobTitle && (
-          <p className="text-red-500 text-sm mt-1">{errors.jobTitle.message}</p>
-        )}
-      </div>
+      <h1 className="text-2xl sm:text-3xl font-semibold text-center">
+        New Application
+      </h1>
+
+      {[
+        { label: "Job Title", name: "jobTitle", type: "text" },
+        { label: "Company Name", name: "companyName", type: "text" },
+        { label: "Application Date", name: "applicationDate", type: "date" },
+        { label: "Location", name: "location", type: "text" },
+        {
+          label: "Contact Person",
+          name: "contactPerson",
+          type: "text",
+          optional: true,
+        },
+        { label: "Interview Round", name: "interviewRound", type: "number" },
+      ].map(({ label, name, type, optional }) => (
+        <div key={name}>
+          <label className="block text-sm sm:text-base font-medium mb-1">
+            {label}
+          </label>
+          <input
+            {...register(name as keyof ApplicationFormData)}
+            type={type}
+            className="w-full px-4 py-3 text-sm sm:text-base border rounded-md focus:ring-2 focus:ring-orange-500"
+          />
+          {errors[name as keyof typeof errors] && !optional && (
+            <p className="text-red-500 text-xs mt-1">
+              {errors[name as keyof typeof errors]?.message as string}
+            </p>
+          )}
+        </div>
+      ))}
 
       <div>
-        <label className="block font-medium mb-1">Company Name</label>
-        <input
-          {...register("companyName")}
-          className="w-full p-3 border rounded-md"
-        />
-        {errors.companyName && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.companyName.message}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <label className="block font-medium mb-1">Application Date</label>
-        <input
-          {...register("applicationDate")}
-          id="applicationDate"
-          name="applicationDate"
-          type="date"
-          defaultValue={new Date().toISOString().slice(0, 16)}
-          className="w-full p-3 border rounded-md"
-        />
-        {errors.applicationDate && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.applicationDate.message}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <label className="block font-medium mb-1">Application Method</label>
+        <label className="block text-sm sm:text-base font-medium mb-1">
+          Application Method
+        </label>
         <select
           {...register("applicationMethod")}
-          className="w-full p-3 border rounded-md"
+          className="w-full px-4 py-3 text-sm sm:text-base border rounded-md"
         >
-          {Object.values(Method).map((method) => (
-            <option key={method} value={method}>
-              {method}
+          {Object.values(Method).map((m) => (
+            <option key={m} value={m}>
+              {m}
             </option>
           ))}
         </select>
       </div>
 
       <div>
-        <label className="block font-medium mb-1">Application Status</label>
+        <label className="block text-sm sm:text-base font-medium mb-1">
+          Application Status
+        </label>
         <select
           {...register("applicationStatus")}
-          className="w-full p-3 border rounded-md"
+          className="w-full px-4 py-3 text-sm sm:text-base border rounded-md"
         >
-          {Object.values(STATUS).map((status) => (
-            <option key={status} value={status}>
-              {status}
+          {Object.values(STATUS).map((s) => (
+            <option key={s} value={s}>
+              {s}
             </option>
           ))}
         </select>
       </div>
 
       <div>
-        <label className="block font-medium mb-1">Location</label>
-        <input
-          {...register("location")}
-          className="w-full p-3 border rounded-md"
-        />
-        {errors.location && (
-          <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="block font-medium mb-1">Contact Person</label>
-        <input
-          {...register("contactPerson")}
-          className="w-full p-3 border rounded-md"
-        />
-      </div>
-
-      <div>
-        <label className="block font-medium mb-1">Platform</label>
+        <label className="block text-sm sm:text-base font-medium mb-1">
+          Platform
+        </label>
         <select
           {...register("platform")}
-          className="w-full p-3 border rounded-md"
+          className="w-full px-4 py-3 text-sm sm:text-base border rounded-md"
         >
-          {Object.values(PLATFORM).map((platform) => (
-            <option key={platform} value={platform}>
-              {platform}
+          {Object.values(PLATFORM).map((p) => (
+            <option key={p} value={p}>
+              {p}
             </option>
           ))}
         </select>
       </div>
 
       <div>
-        <label className="block font-medium mb-1">Interview Round</label>
-        <input
-          type="number"
-          {...register("interviewRound")}
-          className="w-full p-3 border rounded-md"
-        />
-        {errors.interviewRound && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.interviewRound.message}
-          </p>
-        )}
-      </div>
-
-      <div>
-        <label className="block font-medium mb-1">Notes</label>
+        <label className="block text-sm sm:text-base font-medium mb-1">
+          Notes
+        </label>
         <textarea
           {...register("notes")}
-          className="w-full p-3 border rounded-md"
+          className="w-full px-4 py-3 text-sm sm:text-base border rounded-md min-h-[100px]"
         />
       </div>
 
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
-      <div className="flex justify-end gap-4">
-        <Button type="button" variant="secondary" onClick={() => router.back()}>
+      <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-4">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => router.back()}
+          className="w-full sm:w-auto"
+        >
           Cancel
         </Button>
-        <Button type="submit">Save</Button>
+        <Button type="submit" className="w-full sm:w-auto">
+          Save
+        </Button>
       </div>
     </form>
   );

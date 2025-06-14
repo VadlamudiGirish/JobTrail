@@ -28,9 +28,12 @@ export default function ApplicationsPage() {
   const filteredApplications = useMemo(() => {
     return applications.filter((app: Application) => {
       const matchesStatus =
-        !statusFilter || app.applicationStatus === statusFilter;
+        !statusFilter ||
+        statusFilter === "All" ||
+        app.applicationStatus === statusFilter;
       const matchesMonth =
         !monthFilter ||
+        monthFilter === "All" ||
         new Date(app.applicationDate).toLocaleString("default", {
           month: "long",
           year: "numeric",
@@ -72,9 +75,9 @@ export default function ApplicationsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center shadow-sm bg-white rounded-md p-4">
-        <div className="flex gap-4">
+    <div className="space-y-6 px-4 pb-20">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-6 bg-white shadow-sm rounded-md p-4">
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <FilterSelect
             label="Status"
             value={statusFilter}
@@ -88,9 +91,14 @@ export default function ApplicationsPage() {
             options={["All", ...monthOptions]}
           />
         </div>
-        <Button onClick={() => router.push(`/${locale}/applications/new`)}>
-          + New Application
-        </Button>
+        <div className="w-full sm:w-auto">
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => router.push(`/${locale}/applications/new`)}
+          >
+            + New Application
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (

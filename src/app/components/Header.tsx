@@ -101,7 +101,7 @@ export default function Header() {
           <div className="flex items-center justify-between">
             <div className="-m-1.5 p-1.5">
               <Image
-                src="/jobtrail-logo.png"
+                src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
                 alt="JobTrail Logo"
                 width={40}
                 height={40}
@@ -117,6 +117,7 @@ export default function Header() {
               <XMarkIcon aria-hidden="true" className="size-6" />
             </button>
           </div>
+
           {session?.user && (
             <div className="mt-6">
               <div className="-my-6 divide-y divide-gray-500/10">
@@ -125,12 +126,22 @@ export default function Header() {
                     <Link
                       key={item.name}
                       href={item.href}
-                      className="block rounded-lg px-3 py-2 text-base font-semibold text-gray-900 hover:bg-gray-50"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block rounded-lg px-3 py-2 text-base font-semibold ${
+                        isActive(item.href)
+                          ? "text-orange-600 underline underline-offset-4"
+                          : "text-gray-900"
+                      } hover:bg-gray-50`}
                     >
                       {item.name}
                     </Link>
                   ))}
                 </div>
+
+                <div className="py-4 border-t border-gray-100">
+                  <LanguageSwitcher />
+                </div>
+
                 <div className="py-6">
                   <span className="block text-sm mb-2 text-gray-700">
                     {session.user.name}

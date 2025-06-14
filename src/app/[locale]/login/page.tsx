@@ -18,7 +18,7 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 bg-gray-50">
-      <div className="w-full max-w-md space-y-8 p-8 bg-white rounded shadow">
+      <div className="w-full max-w-md space-y-8 p-6 sm:p-8 bg-white rounded-lg shadow-md">
         <div className="text-center">
           <Image
             src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
@@ -36,18 +36,18 @@ export default function LoginPage() {
         <div className="space-y-4">
           <button
             onClick={() => signIn("google")}
-            className="flex items-center justify-center gap-3 w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-100 transition"
+            className="flex items-center justify-center gap-3 w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-100 transition-colors"
           >
             <GoogleIcon className="w-5 h-5" />
-            Sign in with Google
+            <span className="text-sm font-medium">Sign in with Google</span>
           </button>
 
           <button
             onClick={() => signIn("github")}
-            className="flex items-center justify-center gap-3 w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-900 transition"
+            className="flex items-center justify-center gap-3 w-full bg-black text-white py-2 px-4 rounded-md hover:bg-gray-900 transition-colors"
           >
             <GitHubIcon className="w-5 h-5" />
-            Sign in with GitHub
+            <span className="text-sm font-medium">Sign in with GitHub</span>
           </button>
         </div>
       </div>
