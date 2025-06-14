@@ -15,7 +15,7 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(cuid())
+  id            String        @id @default(uuid())
   name          String?
   email         String?       @unique
   emailVerified DateTime?
@@ -32,15 +32,31 @@ enum PLATFORM {
   RECOMMENDATION
   OTHER
 }
+
+enum Method {
+  REFERRAL
+  EMAIL
+  PHONE
+  ONLINE
+  OTHER
+}
+
+enum STATUS {
+  APPLIED
+  INTERVIEWED
+  REJECTED
+  ACCEPTED
+}
 model Application {
-  id                String   @id @default(cuid())
+  id                String   @id @default(uuid())
   applicationDate   DateTime
   companyName       String
   jobTitle          String
-  applicationMethod String
-  applicationStatus String
+  applicationMethod Method
+  applicationStatus STATUS
   contactPerson     String
   platform          PLATFORM
+  interviewRound    Int
   notes             String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -49,7 +65,7 @@ model Application {
 }
 
 model Account {
-  id                 String  @id @default(cuid())
+  id                 String  @id @default(uuid())
   userId             String
   type               String
   provider           String
@@ -67,7 +83,7 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id           String   @id @default(uuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
