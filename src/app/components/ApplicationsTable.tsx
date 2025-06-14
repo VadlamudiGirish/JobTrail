@@ -9,23 +9,23 @@ export default function ApplicationsTable({
   applications: Application[];
 }) {
   return (
-    <div className="overflow-x-auto border rounded-lg shadow-sm">
-      <table className="min-w-full divide-y divide-gray-200 bg-white">
-        <thead className="bg-gray-50">
+    <div className="w-full overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+      <table className="min-w-full bg-white divide-y divide-gray-200 text-sm sm:text-base">
+        <thead className="bg-gray-50 text-gray-700 sticky top-0 z-10">
           <tr>
-            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+            <th className="px-4 py-3 text-left font-semibold whitespace-nowrap">
               Job Title
             </th>
-            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-              Application Status
+            <th className="px-4 py-3 text-left font-semibold whitespace-nowrap">
+              Status
             </th>
-            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-              Application Date
+            <th className="px-4 py-3 text-left font-semibold whitespace-nowrap">
+              Date
             </th>
-            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+            <th className="px-4 py-3 text-left font-semibold whitespace-nowrap">
               Location
             </th>
-            <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
+            <th className="px-4 py-3 text-right font-semibold whitespace-nowrap">
               Actions
             </th>
           </tr>

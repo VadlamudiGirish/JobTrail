@@ -20,7 +20,7 @@ export default function LanguageSwitcher() {
     <select
       onChange={handleChange}
       defaultValue={pathname.startsWith("/de") ? "de" : "en"}
-      className="bg-white text-black rounded p-1 text-sm"
+      className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white text-gray-900"
       disabled={isPending}
     >
       <option value="en">English</option>
