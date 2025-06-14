@@ -2,16 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { STATUS } from "@/generated/prisma";
+import { Application } from "@/types/application";
 import Button from "./Button";
 import { useSWRConfig } from "swr";
-
-type Application = {
-  id: string;
-  jobTitle: string;
-  applicationStatus: STATUS;
-  applicationDate: string;
-};
 
 export default function TableRow({
   application,
@@ -60,6 +53,9 @@ export default function TableRow({
       </td>
       <td className="px-4 py-3 text-sm text-gray-500">
         {new Date(application.applicationDate).toLocaleDateString()}
+      </td>
+      <td className="px-4 py-3 text-sm text-gray-600">
+        {application.location}
       </td>
       <td className="px-4 py-3 text-sm text-right space-x-2">
         <Link href={`/en/applications/${application.id}/edit`}>

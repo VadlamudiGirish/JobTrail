@@ -8,6 +8,7 @@ export type Application = {
   applicationMethod: Method;
   applicationStatus: STATUS;
   contactPerson: string;
+  location: string;
   platform: PLATFORM;
   interviewRound: number;
   notes?: string;

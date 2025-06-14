@@ -22,6 +22,9 @@ export default function ApplicationsTable({
             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
               Application Date
             </th>
+            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+              Location
+            </th>
             <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
               Actions
             </th>
