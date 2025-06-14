@@ -14,7 +14,8 @@ const ApplicationFormSchema = z.object({
   applicationDate: z.string().min(1, "Date is required"),
   applicationMethod: z.nativeEnum(Method),
   applicationStatus: z.nativeEnum(STATUS),
-  contactPerson: z.string().min(1, "Contact person is required"),
+  contactPerson: z.string().optional(),
+  location: z.string().min(1, "Location is required"),
   platform: z.nativeEnum(PLATFORM),
   interviewRound: z.coerce.number().min(0),
   notes: z.string().optional(),
@@ -34,7 +35,7 @@ export default function ApplicationForm() {
       interviewRound: 0,
     },
   });
-  const { locale } = useParams() as { locale: string }; // 💡 get locale from route
+  const { locale } = useParams() as { locale: string };
   const router = useRouter();
   const [error, setError] = useState("");
 
@@ -48,7 +49,7 @@ export default function ApplicationForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...values,
-          applicationDate: dateOnly.toISOString(), // will now be date-only in UTC
+          applicationDate: dateOnly.toISOString(),
         }),
       });
 
@@ -137,16 +138,22 @@ export default function ApplicationForm() {
       </div>
 
       <div>
+        <label className="block font-medium mb-1">Location</label>
+        <input
+          {...register("location")}
+          className="w-full p-3 border rounded-md"
+        />
+        {errors.location && (
+          <p className="text-red-500 text-sm mt-1">{errors.location.message}</p>
+        )}
+      </div>
+
+      <div>
         <label className="block font-medium mb-1">Contact Person</label>
         <input
           {...register("contactPerson")}
           className="w-full p-3 border rounded-md"
         />
-        {errors.contactPerson && (
-          <p className="text-red-500 text-sm mt-1">
-            {errors.contactPerson.message}
-          </p>
-        )}
       </div>
 
       <div>

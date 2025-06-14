@@ -54,7 +54,8 @@ model Application {
   jobTitle          String
   applicationMethod Method
   applicationStatus STATUS
-  contactPerson     String
+  contactPerson     String?
+  location          String
   platform          PLATFORM
   interviewRound    Int
   notes             String?
