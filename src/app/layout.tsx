@@ -34,7 +34,7 @@ export default function RootLayout({
         <AuthSessionProvider>
           <SWRProvider>
             <Header />
-            <main className="flex-1 container mx-auto px-4 pt-24">
+            <main className="pt-20 pb-24 px-4 bg-gray-50 min-h-screen">
               {children}
             </main>
             <Footer />

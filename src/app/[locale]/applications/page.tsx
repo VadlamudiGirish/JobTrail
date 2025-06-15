@@ -1,66 +1,55 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { usePathname, useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { STATUS } from "@/generated/prisma";
 import { Application } from "@/types/application";
 import useSWR from "swr";
 import FilterSelect from "@/app/components/FilterSelect";
 import Button from "@/app/components/Button";
 import ApplicationsTable from "@/app/components/ApplicationsTable";
+import Pagination from "@/app/components/Pagination";
+import SearchInput from "@/app/components/SearchInput";
+
+const PAGE_SIZE = 10;
 
 export default function ApplicationsPage() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const locale = pathname.split("/")[1];
 
-  const [statusFilter, setStatusFilter] = useState("");
-  const [monthFilter, setMonthFilter] = useState("");
+  const page = parseInt(searchParams.get("page") || "1");
+  const statusFilter = searchParams.get("status") || "";
+  const monthFilter = searchParams.get("month") || "";
+  const searchQuery = searchParams.get("search") || "";
+
+  const setQuery = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value === "All" || !value) {
+      params.delete(key);
+    } else {
+      params.set(key, value);
+    }
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const goToPage = (newPage: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", newPage.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   const { data, error, isLoading } = useSWR(
-    session?.user ? "/api/applications" : null
+    session?.user
+      ? `/api/applications?page=${page}&status=${statusFilter}&month=${monthFilter}&search=${searchQuery}`
+      : null
   );
 
-  const applications = useMemo(() => data || [], [data]);
-
-  const filteredApplications = useMemo(() => {
-    return applications.filter((app: Application) => {
-      const matchesStatus =
-        !statusFilter ||
-        statusFilter === "All" ||
-        app.applicationStatus === statusFilter;
-      const matchesMonth =
-        !monthFilter ||
-        monthFilter === "All" ||
-        new Date(app.applicationDate).toLocaleString("default", {
-          month: "long",
-          year: "numeric",
-        }) === monthFilter;
-      return matchesStatus && matchesMonth;
-    });
-  }, [applications, statusFilter, monthFilter]);
-
-  const monthOptions = useMemo(() => {
-    const uniqueMonths = new Set<string>();
-    applications.forEach((app: Application) => {
-      const formatted = new Date(app.applicationDate).toLocaleString(
-        "default",
-        {
-          month: "long",
-          year: "numeric",
-        }
-      );
-      uniqueMonths.add(formatted);
-    });
-    return Array.from(uniqueMonths);
-  }, [applications]);
-
-  if (status === "loading") {
+  if (status === "loading")
     return <div className="p-4">Loading session...</div>;
-  }
-
   if (status === "unauthenticated") {
     router.push(`/${locale}/login`);
     return null;
@@ -74,21 +63,28 @@ export default function ApplicationsPage() {
     );
   }
 
+  const applications: Application[] = data?.applications || [];
+  const totalPages = Math.ceil((data?.total || 0) / PAGE_SIZE);
+
   return (
     <div className="space-y-6 px-4 pb-20">
+      <div className="mt-4">
+        <SearchInput />
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-6 bg-white shadow-sm rounded-md p-4">
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <FilterSelect
             label="Status"
             value={statusFilter}
-            onChange={setStatusFilter}
+            onChange={(val) => setQuery("status", val)}
             options={["All", ...Object.values(STATUS)]}
           />
           <FilterSelect
             label="Month"
             value={monthFilter}
-            onChange={setMonthFilter}
-            options={["All", ...monthOptions]}
+            onChange={(val) => setQuery("month", val)}
+            options={["All", ...(data?.availableMonths || [])]}
           />
         </div>
         <div className="w-full sm:w-auto">
@@ -103,10 +99,18 @@ export default function ApplicationsPage() {
 
       {isLoading ? (
         <div className="text-center text-gray-500">Loading applications...</div>
-      ) : filteredApplications.length === 0 ? (
+      ) : applications.length === 0 ? (
         <div className="text-center text-gray-500">No applications found.</div>
       ) : (
-        <ApplicationsTable applications={filteredApplications} />
+        <>
+          <ApplicationsTable applications={applications} />
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPrevious={() => goToPage(page - 1)}
+            onNext={() => goToPage(page + 1)}
+          />
+        </>
       )}
     </div>
   );
