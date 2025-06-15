@@ -9,6 +9,7 @@ import FilterSelect from "@/app/components/FilterSelect";
 import Button from "@/app/components/Button";
 import ApplicationsTable from "@/app/components/ApplicationsTable";
 import Pagination from "@/app/components/Pagination";
+import SearchInput from "@/app/components/SearchInput";
 
 const PAGE_SIZE = 10;
 
@@ -22,6 +23,7 @@ export default function ApplicationsPage() {
   const page = parseInt(searchParams.get("page") || "1");
   const statusFilter = searchParams.get("status") || "";
   const monthFilter = searchParams.get("month") || "";
+  const searchQuery = searchParams.get("search") || "";
 
   const setQuery = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -42,14 +44,12 @@ export default function ApplicationsPage() {
 
   const { data, error, isLoading } = useSWR(
     session?.user
-      ? `/api/applications?page=${page}&status=${statusFilter}&month=${monthFilter}`
+      ? `/api/applications?page=${page}&status=${statusFilter}&month=${monthFilter}&search=${searchQuery}`
       : null
   );
 
-  if (status === "loading") {
+  if (status === "loading")
     return <div className="p-4">Loading session...</div>;
-  }
-
   if (status === "unauthenticated") {
     router.push(`/${locale}/login`);
     return null;
@@ -68,6 +68,10 @@ export default function ApplicationsPage() {
 
   return (
     <div className="space-y-6 px-4 pb-20">
+      <div className="mt-4">
+        <SearchInput />
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-6 bg-white shadow-sm rounded-md p-4">
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <FilterSelect
