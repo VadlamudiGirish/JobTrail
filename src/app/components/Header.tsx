@@ -27,7 +27,7 @@ export default function Header() {
     <header className="bg-white fixed top-0 left-0 right-0 z-50 shadow">
       <nav
         aria-label="Global"
-        className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
+        className="mx-auto flex max-w-7xl items-center justify-between py-3 px-4 lg:px-8"
       >
         <div className="flex items-center gap-x-12">
           <div className="-m-1.5 p-1.5">
@@ -35,9 +35,9 @@ export default function Header() {
             <Image
               src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
               alt="JobTrail Logo"
-              width={40}
-              height={40}
-              className="h-8 w-auto"
+              width={32}
+              height={32}
+              className="h-6 w-auto"
             />
           </div>
 
@@ -103,9 +103,9 @@ export default function Header() {
               <Image
                 src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
                 alt="JobTrail Logo"
-                width={40}
-                height={40}
-                className="h-8 w-auto"
+                width={32}
+                height={32}
+                className="h-6 w-auto"
               />
             </div>
             <button
@@ -117,7 +117,6 @@ export default function Header() {
               <XMarkIcon aria-hidden="true" className="size-6" />
             </button>
           </div>
-
           {session?.user && (
             <div className="mt-6">
               <div className="-my-6 divide-y divide-gray-500/10">
@@ -129,21 +128,17 @@ export default function Header() {
                       onClick={() => setMobileMenuOpen(false)}
                       className={`block rounded-lg px-3 py-2 text-base font-semibold ${
                         isActive(item.href)
-                          ? "text-orange-600 underline underline-offset-4"
-                          : "text-gray-900"
-                      } hover:bg-gray-50`}
+                          ? "text-orange-600 bg-gray-100"
+                          : "text-gray-900 hover:bg-gray-50"
+                      }`}
                     >
                       {item.name}
                     </Link>
                   ))}
                 </div>
-
-                <div className="py-4 border-t border-gray-100">
+                <div className="py-6 space-y-2">
                   <LanguageSwitcher />
-                </div>
-
-                <div className="py-6">
-                  <span className="block text-sm mb-2 text-gray-700">
+                  <span className="block text-sm text-gray-700">
                     {session.user.name}
                   </span>
                   <button

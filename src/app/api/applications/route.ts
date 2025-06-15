@@ -1,9 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma";
+import { STATUS } from "@/generated/prisma";
 
-export async function GET() {
+const PAGE_SIZE = 10;
+
+export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
@@ -19,42 +23,56 @@ export async function GET() {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  const applications = await prisma.application.findMany({
-    where: {
-      userId: user.id,
-    },
-    orderBy: {
-      applicationDate: "desc",
-    },
-  });
+  const { searchParams } = new URL(req.url);
+  const page = parseInt(searchParams.get("page") || "1");
+  const status = searchParams.get("status");
+  const month = searchParams.get("month");
 
-  return NextResponse.json(applications);
-}
+  const filters: Prisma.ApplicationWhereInput = {
+    userId: user.id,
+  };
 
-export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (status && status !== "All") {
+    filters.applicationStatus = status as STATUS;
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    select: { id: true },
-  });
+  if (month && month !== "All") {
+    const [monthStr, yearStr] = month.split(" ");
+    const date = new Date(`${monthStr} 1, ${yearStr}`);
+    const nextMonth = new Date(date);
+    nextMonth.setMonth(date.getMonth() + 1);
 
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    filters.applicationDate = {
+      gte: date,
+      lt: nextMonth,
+    };
   }
 
-  const body = await req.json();
+  const [total, applications] = await Promise.all([
+    prisma.application.count({ where: filters }),
+    prisma.application.findMany({
+      where: filters,
+      orderBy: { applicationDate: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+  ]);
 
-  const newApp = await prisma.application.create({
-    data: {
-      ...body,
-      userId: user.id,
-    },
+  const monthsRaw = await prisma.application.findMany({
+    where: { userId: user.id },
+    select: { applicationDate: true },
   });
 
-  return NextResponse.json(newApp, { status: 201 });
+  const availableMonths = Array.from(
+    new Set(
+      monthsRaw.map((a) =>
+        new Date(a.applicationDate).toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        })
+      )
+    )
+  );
+
+  return NextResponse.json({ total, applications, availableMonths });
 }
