@@ -11,15 +11,16 @@ export const metadata: Metadata = {
   title: "Application Details",
 };
 
-type PageProps = {
+interface PageProps {
   params: {
     id: string;
     locale: string;
   };
-};
+}
 
 export default async function ApplicationDetailPage({ params }: PageProps) {
-  const { id, locale } = params;
+  const id = params.id;
+  const locale = params.locale;
 
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
