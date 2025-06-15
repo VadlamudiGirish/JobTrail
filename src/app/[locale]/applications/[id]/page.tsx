@@ -5,16 +5,23 @@ import { notFound, redirect } from "next/navigation";
 import Button from "@/app/components/Button";
 import Link from "next/link";
 import ActionButtons from "@/app/components/ActionButtons";
+import { type Metadata } from "next";
 
-type Props = {
-  params: { locale: string; id: string };
+type PageProps = {
+  params: {
+    locale: string;
+    id: string;
+  };
 };
 
-export default async function ApplicationDetailPage({ params }: Props) {
+export const metadata: Metadata = {
+  title: "Application Details",
+};
+
+export default async function ApplicationDetailPage({ params }: PageProps) {
+  const { id, locale } = await params;
+
   const session = await getServerSession(authOptions);
-
-  const { locale, id } = await params;
-
   if (!session?.user?.email) {
     redirect(`/${locale}/login`);
   }
@@ -25,7 +32,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
   });
 
   const application = await prisma.application.findUnique({
-    where: { id: id },
+    where: { id },
   });
 
   if (!user || !application || application.userId !== user.id) {
@@ -69,11 +76,10 @@ export default async function ApplicationDetailPage({ params }: Props) {
           <strong>Notes:</strong> {application.notes || "—"}
         </div>
 
-        <div className="flex gap-4 pt-6">
+        <div className="flex flex-col sm:flex-row gap-3 pt-6">
           <Link href={`/${locale}/applications`}>
             <Button variant="secondary">← Back</Button>
           </Link>
-
           <ActionButtons id={id} locale={locale} />
         </div>
       </div>
