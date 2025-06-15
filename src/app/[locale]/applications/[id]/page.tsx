@@ -12,8 +12,11 @@ type Props = {
 
 export default async function ApplicationDetailPage({ params }: Props) {
   const session = await getServerSession(authOptions);
+
+  const { locale, id } = await params;
+
   if (!session?.user?.email) {
-    redirect(`/${params.locale}/login`);
+    redirect(`/${locale}/login`);
   }
 
   const user = await prisma.user.findUnique({
@@ -22,7 +25,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
   });
 
   const application = await prisma.application.findUnique({
-    where: { id: params.id },
+    where: { id: id },
   });
 
   if (!user || !application || application.userId !== user.id) {
@@ -67,11 +70,11 @@ export default async function ApplicationDetailPage({ params }: Props) {
         </div>
 
         <div className="flex gap-4 pt-6">
-          <Link href={`/${params.locale}/applications`}>
+          <Link href={`/${locale}/applications`}>
             <Button variant="secondary">← Back</Button>
           </Link>
 
-          <ActionButtons id={params.id} locale={params.locale} />
+          <ActionButtons id={id} locale={locale} />
         </div>
       </div>
     </div>
