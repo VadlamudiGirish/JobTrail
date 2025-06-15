@@ -7,19 +7,19 @@ import Link from "next/link";
 import ActionButtons from "@/app/components/ActionButtons";
 import { type Metadata } from "next";
 
-type PageProps = {
-  params: {
-    locale: string;
-    id: string;
-  };
-};
-
 export const metadata: Metadata = {
   title: "Application Details",
 };
 
+type PageProps = {
+  params: {
+    id: string;
+    locale: string;
+  };
+};
+
 export default async function ApplicationDetailPage({ params }: PageProps) {
-  const { id, locale } = await params;
+  const { id, locale } = params;
 
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
