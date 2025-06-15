@@ -5,10 +5,10 @@ import { Application } from "@/types/application";
 
 export default function ApplicationsTable({
   applications,
-  onDelete,
+  locale,
 }: {
   applications: Application[];
-  onDelete: (id: string) => void;
+  locale: string;
 }) {
   return (
     <div className="w-full overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
@@ -35,9 +35,9 @@ export default function ApplicationsTable({
         <tbody className="divide-y divide-gray-100">
           {applications.map((application) => (
             <TableRow
+              locale={locale}
               key={application.id}
               application={application}
-              onDelete={onDelete}
             />
           ))}
         </tbody>

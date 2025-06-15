@@ -1,16 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Application } from "@/types/application";
-import Button from "./Button";
+import ActionButtons from "./ActionButtons";
 
 export default function TableRow({
   application,
-  onDelete,
+  locale,
 }: {
   application: Application;
-  onDelete: (id: string) => void;
+  locale: string;
 }) {
   const router = useRouter();
 
@@ -31,28 +30,8 @@ export default function TableRow({
       <td className="px-4 py-3 text-sm text-gray-600 break-words">
         {application.location}
       </td>
-      <td className="px-4 py-3 text-sm text-right">
-        <div className="flex flex-col sm:flex-row justify-end gap-2">
-          <Link href={`/en/applications/${application.id}/edit`}>
-            <Button
-              variant="primary"
-              onClick={(e) => e.stopPropagation()}
-              className="w-full sm:w-auto"
-            >
-              Edit
-            </Button>
-          </Link>
-          <Button
-            variant="secondary"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(application.id);
-            }}
-            className="w-full sm:w-auto"
-          >
-            Delete
-          </Button>
-        </div>
+      <td className="px-4 py-3 text-sm align-top w-[160px]">
+        <ActionButtons id={application.id} locale={locale} />
       </td>
     </tr>
   );

@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { STATUS } from "@/generated/prisma";
 import { Application } from "@/types/application";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import FilterSelect from "@/app/components/FilterSelect";
 import Button from "@/app/components/Button";
 import ApplicationsTable from "@/app/components/ApplicationsTable";
@@ -66,27 +66,6 @@ export default function ApplicationsPage() {
   const applications: Application[] = data?.applications || [];
   const totalPages = Math.ceil((data?.total || 0) / PAGE_SIZE);
 
-  const handleDelete = async (id: string) => {
-    const confirmed = confirm(
-      "Are you sure you want to delete this application?"
-    );
-    if (!confirmed) return;
-
-    try {
-      const res = await fetch(`/api/applications/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) throw new Error("Failed to delete");
-
-      mutate(
-        `/api/applications?page=${page}&status=${statusFilter}&month=${monthFilter}&search=${searchParams}`
-      );
-    } catch (err) {
-      console.error("Error deleting application:", err);
-    }
-  };
-
   return (
     <div className="space-y-6 px-4 pb-20">
       <div className="mt-4">
@@ -124,10 +103,7 @@ export default function ApplicationsPage() {
         <div className="text-center text-gray-500">No applications found.</div>
       ) : (
         <>
-          <ApplicationsTable
-            applications={applications}
-            onDelete={handleDelete}
-          />
+          <ApplicationsTable locale={locale} applications={applications} />
           <Pagination
             currentPage={page}
             totalPages={totalPages}
