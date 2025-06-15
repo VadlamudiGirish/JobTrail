@@ -103,7 +103,7 @@ export default function ApplicationsPage() {
         <div className="text-center text-gray-500">No applications found.</div>
       ) : (
         <>
-          <ApplicationsTable applications={applications} />
+          <ApplicationsTable locale={locale} applications={applications} />
           <Pagination
             currentPage={page}
             totalPages={totalPages}
