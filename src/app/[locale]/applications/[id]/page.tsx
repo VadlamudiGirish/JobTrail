@@ -1,47 +1,36 @@
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { notFound, redirect } from "next/navigation";
-import Button from "@/app/components/Button";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import Button from "@/app/components/Button";
 import ActionButtons from "@/app/components/ActionButtons";
-import { type Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Application Details",
 };
 
-interface PageProps {
-  params: {
-    id: string;
-    locale: string;
-  };
-}
+type Params = Promise<{
+  id: string;
+  locale: string;
+}>;
 
-export default async function ApplicationDetailPage({ params }: PageProps) {
-  const id = params.id;
-  const locale = params.locale;
-
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
-    redirect(`/${locale}/login`);
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    select: { id: true },
-  });
+export default async function ApplicationDetailPage({
+  params,
+}: {
+  params: Params;
+}) {
+  const { id, locale } = await params;
 
   const application = await prisma.application.findUnique({
     where: { id },
   });
 
-  if (!user || !application || application.userId !== user.id) {
+  if (!application) {
     notFound();
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 pt-20 pb-20">
       <div className="bg-white shadow-md rounded-lg p-6 space-y-4">
         <h1 className="text-2xl font-semibold">Application Details</h1>
 
@@ -77,7 +66,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           <strong>Notes:</strong> {application.notes || "—"}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 pt-6">
+        <div className="flex flex-col sm:flex-row gap-4 pt-6">
           <Link href={`/${locale}/applications`}>
             <Button variant="secondary">← Back</Button>
           </Link>
