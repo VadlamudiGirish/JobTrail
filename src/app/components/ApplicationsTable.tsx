@@ -5,8 +5,10 @@ import { Application } from "@/types/application";
 
 export default function ApplicationsTable({
   applications,
+  locale,
 }: {
   applications: Application[];
+  locale: string;
 }) {
   return (
     <div className="w-full overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
@@ -32,7 +34,11 @@ export default function ApplicationsTable({
         </thead>
         <tbody className="divide-y divide-gray-100">
           {applications.map((application) => (
-            <TableRow key={application.id} application={application} />
+            <TableRow
+              locale={locale}
+              key={application.id}
+              application={application}
+            />
           ))}
         </tbody>
       </table>
