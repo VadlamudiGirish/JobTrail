@@ -4,41 +4,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Application } from "@/types/application";
 import Button from "./Button";
-import { useSWRConfig } from "swr";
 
 export default function TableRow({
   application,
+  onDelete,
 }: {
   application: Application;
+  onDelete: (id: string) => void;
 }) {
   const router = useRouter();
-  const { mutate } = useSWRConfig();
-
-  const handleDelete = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.stopPropagation();
-
-    const confirmed = confirm(
-      "Are you sure you want to delete this application?"
-    );
-    if (!confirmed) return;
-
-    try {
-      const res = await fetch(`/api/applications/${application.id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to delete");
-      }
-
-      mutate("/api/applications");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete application.");
-    }
-  };
 
   return (
     <tr
@@ -70,7 +44,10 @@ export default function TableRow({
           </Link>
           <Button
             variant="secondary"
-            onClick={handleDelete}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(application.id);
+            }}
             className="w-full sm:w-auto"
           >
             Delete

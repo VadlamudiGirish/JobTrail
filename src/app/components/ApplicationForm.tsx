@@ -3,74 +3,75 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter, useParams } from "next/navigation";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { PLATFORM, STATUS, Method } from "@/generated/prisma";
 import Button from "@/app/components/Button";
 
 const ApplicationFormSchema = z.object({
-  jobTitle: z.string().min(1, "Job title is required"),
-  companyName: z.string().min(1, "Company name is required"),
-  applicationDate: z.string().min(1, "Date is required"),
+  jobTitle: z.string().min(1),
+  companyName: z.string().min(1),
+  applicationDate: z.string().min(1),
+  location: z.string().min(1),
   applicationMethod: z.nativeEnum(Method),
   applicationStatus: z.nativeEnum(STATUS),
-  contactPerson: z.string().optional(),
-  location: z.string().min(1, "Location is required"),
   platform: z.nativeEnum(PLATFORM),
   interviewRound: z.coerce.number().min(0),
+  contactPerson: z.string().optional(),
   notes: z.string().optional(),
 });
 
-type ApplicationFormData = z.infer<typeof ApplicationFormSchema>;
+export type ApplicationFormData = z.infer<typeof ApplicationFormSchema>;
 
-export default function ApplicationForm() {
+type Props = {
+  initialData?: Partial<ApplicationFormData>;
+  onSubmit: (values: ApplicationFormData) => Promise<void>;
+};
+
+export default function ApplicationForm({ initialData, onSubmit }: Props) {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<ApplicationFormData>({
     resolver: zodResolver(ApplicationFormSchema),
     defaultValues: {
       applicationDate: new Date().toISOString().split("T")[0],
       interviewRound: 0,
+      ...initialData,
     },
   });
 
-  const { locale } = useParams() as { locale: string };
   const router = useRouter();
   const [error, setError] = useState("");
 
-  const onSubmit = async (values: ApplicationFormData) => {
-    try {
-      const dateOnly = new Date(values.applicationDate);
-      dateOnly.setHours(0, 0, 0, 0);
-
-      const res = await fetch("/api/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...values,
-          applicationDate: dateOnly.toISOString(),
-        }),
-      });
-
-      if (!res.ok) throw new Error("Failed to create application");
-
-      router.push(`/${locale}/applications`);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
+  useEffect(() => {
+    if (initialData?.applicationDate) {
+      const formatted = new Date(initialData.applicationDate)
+        .toISOString()
+        .split("T")[0];
+      setValue("applicationDate", formatted);
     }
-  };
+  }, [initialData?.applicationDate, setValue]);
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(async (data) => {
+        try {
+          await onSubmit(data);
+        } catch (err: unknown) {
+          if (err instanceof Error) {
+            setError(err.message);
+          } else {
+            setError("Unknown error occurred");
+          }
+        }
+      })}
       className="space-y-6 w-full max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-xl shadow-md"
     >
       <h1 className="text-2xl sm:text-3xl font-semibold text-center">
-        New Application
+        {initialData ? "Edit Application" : "New Application"}
       </h1>
 
       {[
