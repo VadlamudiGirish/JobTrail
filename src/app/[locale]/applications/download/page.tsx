@@ -1,98 +1,84 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import useSWR from "swr";
 import { usePathname } from "next/navigation";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-
 import { PDFDocument } from "@/app/components/PDFDocument";
 import FilterSelect from "@/app/components/FilterSelect";
 import UserProfileForm from "@/app/components/UserProfileForm";
 import Button from "@/app/components/Button";
 import { Application } from "@/types/application";
-import { UserProfile } from "@/types/user";
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function DownloadPage() {
   const pathname = usePathname();
   const locale = pathname.split("/")[1] || "en";
 
-  const [selectedMonth, setSelectedMonth] = useState("");
-  const [profile, setProfile] = useState<UserProfile>({
+  const [profile, setProfile] = useState({
     firstName: "",
     lastName: "",
     customerNumber: "",
   });
-
-  const { data: monthData } = useSWR<{ availableMonths: string[] }>(
-    `/api/applications/download?locale=${locale}`,
-    fetcher
-  );
-
-  const { data: applications, isLoading } = useSWR<Application[]>(
-    selectedMonth
-      ? `/api/applications/download?month=${encodeURIComponent(
-          selectedMonth
-        )}&locale=${locale}`
-      : null,
-    fetcher
-  );
+  const [month, setMonth] = useState("");
+  const [availableMonths, setAvailableMonths] = useState<string[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
 
   useEffect(() => {
     fetch("/api/user/profile")
-      .then((res) => res.json())
-      .then((data: UserProfile) => {
+      .then((r) => r.json())
+      .then((data) => {
         if (data.firstName) setProfile(data);
       });
   }, []);
 
+  useEffect(() => {
+    fetch(`/api/applications/download?locale=${locale}`)
+      .then((r) => r.json())
+      .then((d) => setAvailableMonths(d.availableMonths || []));
+  }, [locale]);
+
+  useEffect(() => {
+    if (!month) return;
+    fetch(
+      `/api/applications/download?month=${encodeURIComponent(
+        month
+      )}&locale=${locale}`
+    )
+      .then((r) => r.json())
+      .then((apps: Application[]) => setApplications(apps));
+  }, [month, locale]);
+
   return (
     <div className="max-w-2xl mx-auto space-y-6 p-4">
       <h1 className="text-2xl font-semibold text-center">
-        Download Application Summary
+        Download Applications
       </h1>
 
       <div className="bg-white p-6 rounded-lg shadow space-y-6">
-        {/* Profile form */}
         <UserProfileForm onSaved={setProfile} />
-
-        {/* Month Selector */}
         <FilterSelect
           label="Month"
-          value={selectedMonth}
-          options={["", ...(monthData?.availableMonths || [])]}
-          onChange={setSelectedMonth}
+          value={month}
+          options={["", ...availableMonths]}
+          onChange={setMonth}
         />
       </div>
 
-      {/* PDF Download Button */}
-      <div className="text-center pt-4">
-        {!selectedMonth && (
-          <p className="text-gray-500">Please select a month.</p>
+      <div className="text-center">
+        {!month && <p className="text-gray-500">Please select a month.</p>}
+        {month && applications.length === 0 && (
+          <p className="text-gray-500">No applications in {month}.</p>
         )}
-
-        {selectedMonth && isLoading && (
-          <p className="text-gray-500">Loading applications...</p>
-        )}
-
-        {selectedMonth && applications?.length === 0 && (
-          <p className="text-gray-500">
-            No applications found for {selectedMonth}.
-          </p>
-        )}
-
-        {selectedMonth && applications && applications.length > 0 && (
+        {month && applications.length > 0 && (
           <PDFDownloadLink
             document={
               <PDFDocument
                 applications={applications}
-                month={selectedMonth}
+                month={month}
                 locale={locale}
                 profile={profile}
               />
             }
-            fileName={`Applications_${selectedMonth}.pdf`}
+            fileName={`Applications_${month}.pdf`}
           >
             {({ loading }) =>
               loading ? (
