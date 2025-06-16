@@ -87,7 +87,13 @@ export default function ApplicationsPage() {
             options={["All", ...(data?.availableMonths || [])]}
           />
         </div>
-        <div className="w-full sm:w-auto">
+        <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => router.push(`/${locale}/applications/download`)}
+          >
+            Export PDF
+          </Button>
           <Button
             className="w-full sm:w-auto"
             onClick={() => router.push(`/${locale}/applications/new`)}
