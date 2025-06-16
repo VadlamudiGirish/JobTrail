@@ -32,18 +32,30 @@ export default function DownloadPage() {
   useEffect(() => {
     fetch(`/api/applications/download?locale=${locale}`)
       .then((res) => res.json())
-      .then((data) => setAvailableMonths(data.availableMonths || []));
+      .then((data) => {
+        const months = data.availableMonths || [];
+        setAvailableMonths([
+          "All",
+          ...months.filter((m: string) => m !== "All"),
+        ]);
+      });
   }, [locale]);
 
   useEffect(() => {
-    if (!month) return;
-    fetch(
-      `/api/applications/download?month=${encodeURIComponent(
-        month
-      )}&locale=${locale}`
-    )
+    if (!month) {
+      setApplications([]);
+      return;
+    }
+
+    const url = `/api/applications/download?month=${encodeURIComponent(
+      month
+    )}&locale=${locale}`;
+
+    fetch(url)
       .then((res) => res.json())
-      .then((apps: Application[]) => setApplications(apps));
+      .then((apps: Application[]) => {
+        setApplications(apps);
+      });
   }, [month, locale]);
 
   return (
@@ -67,7 +79,7 @@ export default function DownloadPage() {
         {month && applications.length === 0 && (
           <p className="text-gray-500">No applications in {month}.</p>
         )}
-        {month && applications.length > 0 && (
+        {applications.length > 0 && (
           <PDFDownloadButton
             applications={applications}
             month={month}

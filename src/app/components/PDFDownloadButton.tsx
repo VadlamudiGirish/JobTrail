@@ -24,7 +24,12 @@ export default function PDFDownloadButton({
     const doc = new jsPDF();
 
     doc.setFontSize(14);
-    doc.text(`Application Report - ${month}`, 14, 20);
+    doc.text(
+      `Application Report - ${month === "All" ? "All Months" : month}`,
+      14,
+      20
+    );
+    doc.save(`Applications_${month === "All" ? "All" : month}.pdf`);
 
     doc.setFontSize(10);
     doc.text(`Customer Number: ${profile.customerNumber}`, 14, 30);

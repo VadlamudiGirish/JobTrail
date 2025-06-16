@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const month = url.searchParams.get("month");
   const locale = url.searchParams.get("locale") || "en";
 
-  if (!month) {
+  if (month === null) {
     const raw = await prisma.application.findMany({
       where: { userId: session.user.id },
       select: { applicationDate: true },
@@ -31,6 +31,26 @@ export async function GET(req: NextRequest) {
     );
 
     return NextResponse.json({ availableMonths });
+  }
+
+  if (month === "All") {
+    const allApps = await prisma.application.findMany({
+      where: { userId: session.user.id },
+      orderBy: { applicationDate: "desc" },
+    });
+
+    const sanitized = allApps.map((app) => ({
+      ...app,
+      applicationDate: app.applicationDate.toISOString(),
+      createdAt: app.createdAt.toISOString(),
+      updatedAt: app.updatedAt.toISOString(),
+      contactPerson: app.contactPerson ?? "",
+      location: app.location ?? "",
+      platform: app.platform ?? "Other",
+      notes: app.notes ?? "",
+    }));
+
+    return NextResponse.json(sanitized);
   }
 
   const [monthName, yearStr] = month.split(" ");
