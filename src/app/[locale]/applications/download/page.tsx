@@ -2,11 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import { PDFDocument } from "@/app/components/PDFDocument";
 import FilterSelect from "@/app/components/FilterSelect";
 import UserProfileForm from "@/app/components/UserProfileForm";
-import Button from "@/app/components/Button";
+import PDFDownloadButton from "@/app/components/PDFDownloadButton";
 import { Application } from "@/types/application";
 
 export default function DownloadPage() {
@@ -18,13 +16,14 @@ export default function DownloadPage() {
     lastName: "",
     customerNumber: "",
   });
+
   const [month, setMonth] = useState("");
   const [availableMonths, setAvailableMonths] = useState<string[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
 
   useEffect(() => {
     fetch("/api/user/profile")
-      .then((r) => r.json())
+      .then((res) => res.json())
       .then((data) => {
         if (data.firstName) setProfile(data);
       });
@@ -32,8 +31,8 @@ export default function DownloadPage() {
 
   useEffect(() => {
     fetch(`/api/applications/download?locale=${locale}`)
-      .then((r) => r.json())
-      .then((d) => setAvailableMonths(d.availableMonths || []));
+      .then((res) => res.json())
+      .then((data) => setAvailableMonths(data.availableMonths || []));
   }, [locale]);
 
   useEffect(() => {
@@ -43,7 +42,7 @@ export default function DownloadPage() {
         month
       )}&locale=${locale}`
     )
-      .then((r) => r.json())
+      .then((res) => res.json())
       .then((apps: Application[]) => setApplications(apps));
   }, [month, locale]);
 
@@ -69,27 +68,11 @@ export default function DownloadPage() {
           <p className="text-gray-500">No applications in {month}.</p>
         )}
         {month && applications.length > 0 && (
-          <PDFDownloadLink
-            document={
-              <PDFDocument
-                applications={applications}
-                month={month}
-                locale={locale}
-                profile={profile}
-              />
-            }
-            fileName={`Applications_${month}.pdf`}
-          >
-            {({ loading }) =>
-              loading ? (
-                <Button variant="primary" disabled>
-                  Generating PDF...
-                </Button>
-              ) : (
-                <Button variant="primary">Download PDF</Button>
-              )
-            }
-          </PDFDownloadLink>
+          <PDFDownloadButton
+            applications={applications}
+            month={month}
+            profile={profile}
+          />
         )}
       </div>
     </div>
