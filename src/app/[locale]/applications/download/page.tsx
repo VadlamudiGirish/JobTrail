@@ -12,7 +12,6 @@ import Button from "@/app/components/Button";
 import { Application } from "@/types/application";
 import { UserProfile } from "@/types/user";
 
-// 🧠 Fetcher for SWR
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function DownloadPage() {
@@ -26,13 +25,11 @@ export default function DownloadPage() {
     customerNumber: "",
   });
 
-  // 🎯 Fetch list of available months
   const { data: monthData } = useSWR<{ availableMonths: string[] }>(
     `/api/applications/download?locale=${locale}`,
     fetcher
   );
 
-  // 🎯 Fetch applications when month selected
   const { data: applications, isLoading } = useSWR<Application[]>(
     selectedMonth
       ? `/api/applications/download?month=${encodeURIComponent(
@@ -42,7 +39,6 @@ export default function DownloadPage() {
     fetcher
   );
 
-  // 🎯 Fetch profile once
   useEffect(() => {
     fetch("/api/user/profile")
       .then((res) => res.json())

@@ -19,7 +19,6 @@ export default function UserProfileForm({ onSaved }: Props) {
 
   const [loading, setLoading] = useState(false);
 
-  // Load existing profile
   useEffect(() => {
     fetch("/api/user/profile")
       .then((res) => res.json())

@@ -14,7 +14,6 @@ export async function GET(req: NextRequest) {
   const locale = url.searchParams.get("locale") || "en";
 
   if (!month) {
-    // Return available months
     const raw = await prisma.application.findMany({
       where: { userId: session.user.id },
       select: { applicationDate: true },
@@ -34,7 +33,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ availableMonths });
   }
 
-  // Fetch applications for the selected month
   const [monthName, yearStr] = month.split(" ");
   const from = new Date(`${monthName} 1, ${yearStr}`);
   const to = new Date(from);
@@ -51,7 +49,6 @@ export async function GET(req: NextRequest) {
     orderBy: { applicationDate: "desc" },
   });
 
-  // Sanitize output for frontend expectations
   const sanitized = apps.map((app) => ({
     ...app,
     applicationDate: app.applicationDate.toISOString(),
