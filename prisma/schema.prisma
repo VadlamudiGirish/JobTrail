@@ -23,6 +23,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   applications  Application[]
+  profile       UserProfile?  @relation(name: "UserToUserProfile")
 }
 
 enum PLATFORM {
@@ -48,6 +49,7 @@ enum STATUS {
   REJECTED
   ACCEPTED
 }
+
 model Application {
   id                String   @id @default(uuid())
   applicationDate   DateTime
@@ -67,19 +69,19 @@ model Application {
 }
 
 model Account {
-  id                 String  @id @default(uuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
-  user               User     @relation(fields: [userId], references: [id])
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id])
 
   @@unique([provider, providerAccountId])
 }
@@ -100,3 +102,15 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model UserProfile {
+  id             String @id @default(uuid())
+  firstName      String
+  lastName       String
+  customerNumber String
+
+  userId String @unique
+  user   User   @relation(name: "UserToUserProfile", fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
