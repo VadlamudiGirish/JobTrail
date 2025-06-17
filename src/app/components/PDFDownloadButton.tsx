@@ -1,5 +1,4 @@
-"use client";
-
+import { useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Application } from "@/types/application";
@@ -20,7 +19,10 @@ export default function PDFDownloadButton({
   month,
   profile,
 }: Props) {
+  const [loading, setLoading] = useState(false);
+
   const generatePDF = () => {
+    setLoading(true);
     const doc = new jsPDF();
 
     doc.setFontSize(14);
@@ -29,7 +31,6 @@ export default function PDFDownloadButton({
       14,
       20
     );
-    doc.save(`Applications_${month === "All" ? "All" : month}.pdf`);
 
     doc.setFontSize(10);
     doc.text(`Customer Number: ${profile.customerNumber}`, 14, 30);
@@ -59,9 +60,8 @@ export default function PDFDownloadButton({
     });
 
     const pageCount = doc.getNumberOfPages();
-    const pageSize = doc.internal.pageSize;
-    const pageWidth = pageSize.getWidth();
-    const pageHeight = pageSize.getHeight();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
 
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -69,12 +69,13 @@ export default function PDFDownloadButton({
       doc.text(`Page ${i} of ${pageCount}`, pageWidth - 40, pageHeight - 10);
     }
 
-    doc.save(`Applications_${month}.pdf`);
+    doc.save(`Applications_${month === "All" ? "All" : month}.pdf`);
+    setLoading(false);
   };
 
   return (
-    <Button onClick={generatePDF} variant="primary">
-      Download PDF
+    <Button onClick={generatePDF} variant="primary" disabled={loading}>
+      {loading ? "Generating..." : "Download PDF"}
     </Button>
   );
 }
