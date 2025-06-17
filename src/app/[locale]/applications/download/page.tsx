@@ -46,6 +46,7 @@ export default function DownloadPage() {
       setApplications([]);
       return;
     }
+    console.log(month, "month");
 
     const url = `/api/applications/download?month=${encodeURIComponent(
       month
@@ -76,15 +77,21 @@ export default function DownloadPage() {
 
       <div className="text-center">
         {!month && <p className="text-gray-500">Please select a month.</p>}
+
         {month && applications.length === 0 && (
-          <p className="text-gray-500">No applications in {month}.</p>
+          <p className="text-gray-500">
+            No applications in {month === "All" ? "any month" : month}.
+          </p>
         )}
-        {applications.length > 0 && (
+
+        {month && applications.length > 0 ? (
           <PDFDownloadButton
             applications={applications}
             month={month}
             profile={profile}
           />
+        ) : (
+          month && <p className="text-gray-400 text-sm">Loading...</p>
         )}
       </div>
     </div>
