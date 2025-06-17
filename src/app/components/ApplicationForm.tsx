@@ -1,12 +1,13 @@
 "use client";
 
+import { Fragment, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { PLATFORM, STATUS, Method } from "@/generated/prisma";
 import Button from "@/app/components/Button";
+import { toUTCDate } from "@/utils/date";
 
 const ApplicationFormSchema = z.object({
   jobTitle: z.string().min(1),
@@ -16,9 +17,14 @@ const ApplicationFormSchema = z.object({
   applicationMethod: z.nativeEnum(Method),
   applicationStatus: z.nativeEnum(STATUS),
   platform: z.nativeEnum(PLATFORM),
-  interviewRound: z.coerce.number().min(0),
+  interviewRound: z.coerce
+    .number()
+    .min(0, "Interview round cannot be negative"),
   contactPerson: z.string().optional(),
   notes: z.string().optional(),
+  jobLink: z.string().url().optional(),
+  jobDescription: z.string().optional(),
+  interviewDates: z.array(z.string().min(1, "Date required")).optional(),
 });
 
 export type ApplicationFormData = z.infer<typeof ApplicationFormSchema>;
@@ -29,31 +35,54 @@ type Props = {
 };
 
 export default function ApplicationForm({ initialData, onSubmit }: Props) {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<ApplicationFormData>({
     resolver: zodResolver(ApplicationFormSchema),
     defaultValues: {
       applicationDate: new Date().toISOString().split("T")[0],
       interviewRound: 0,
+      interviewDates: [],
       ...initialData,
     },
   });
 
-  const router = useRouter();
   const [error, setError] = useState("");
+  const interviewRound = watch("interviewRound");
 
+  // Keep the interviewDates array length in sync with interviewRound
+  useEffect(() => {
+    const current = watch("interviewDates") || [];
+    const expanded = Array.from(
+      { length: interviewRound },
+      (_, i) => current[i] || ""
+    );
+    setValue("interviewDates", expanded);
+  }, [interviewRound, setValue, watch]);
+
+  // On mount or when initialData changes, set all date inputs via UTC
   useEffect(() => {
     if (initialData?.applicationDate) {
-      const formatted = new Date(initialData.applicationDate)
+      const formatted = toUTCDate(initialData.applicationDate)
         .toISOString()
         .split("T")[0];
       setValue("applicationDate", formatted);
     }
-  }, [initialData?.applicationDate, setValue]);
+    if (
+      initialData?.interviewDates &&
+      Array.isArray(initialData.interviewDates)
+    ) {
+      const formattedDates = initialData.interviewDates.map(
+        (d) => toUTCDate(d).toISOString().split("T")[0]
+      );
+      setValue("interviewDates", formattedDates);
+    }
+  }, [initialData, setValue]);
 
   return (
     <form
@@ -61,11 +90,9 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
         try {
           await onSubmit(data);
         } catch (err: unknown) {
-          if (err instanceof Error) {
-            setError(err.message);
-          } else {
-            setError("Unknown error occurred");
-          }
+          setError(
+            err instanceof Error ? err.message : "Unknown error occurred"
+          );
         }
       })}
       className="space-y-6 w-full max-w-2xl mx-auto bg-white p-6 sm:p-8 rounded-xl shadow-md"
@@ -74,27 +101,44 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
         {initialData ? "Edit Application" : "New Application"}
       </h1>
 
+      {/* Basic text/date/number inputs */}
       {[
-        { label: "Job Title", name: "jobTitle", type: "text" },
-        { label: "Company Name", name: "companyName", type: "text" },
-        { label: "Application Date", name: "applicationDate", type: "date" },
-        { label: "Location", name: "location", type: "text" },
+        { name: "jobTitle", label: "Job Title", type: "text" },
         {
-          label: "Contact Person",
+          name: "companyName",
+          label: "Company Name",
+          type: "text",
+        },
+        {
+          name: "applicationDate",
+          label: "Application Date",
+          type: "date",
+        },
+        { name: "location", label: "Location", type: "text" },
+        {
           name: "contactPerson",
+          label: "Contact Person",
           type: "text",
           optional: true,
         },
-        { label: "Interview Round", name: "interviewRound", type: "number" },
-      ].map(({ label, name, type, optional }) => (
+        {
+          name: "jobLink",
+          label: "Job Link",
+          type: "url",
+          optional: true,
+        },
+        {
+          name: "interviewRound",
+          label: "Interview Round",
+          type: "number",
+        },
+      ].map(({ name, label, type, optional }) => (
         <div key={name}>
-          <label className="block text-sm sm:text-base font-medium mb-1">
-            {label}
-          </label>
+          <label className="block text-sm font-medium mb-1">{label}</label>
           <input
-            {...register(name as keyof ApplicationFormData)}
             type={type}
-            className="w-full px-4 py-3 text-sm sm:text-base border rounded-md focus:ring-2 focus:ring-orange-500"
+            {...register(name as keyof ApplicationFormData)}
+            className="w-full px-4 py-3 border rounded-md"
           />
           {errors[name as keyof typeof errors] && !optional && (
             <p className="text-red-500 text-xs mt-1">
@@ -104,61 +148,73 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
         </div>
       ))}
 
-      <div>
-        <label className="block text-sm sm:text-base font-medium mb-1">
-          Application Method
-        </label>
-        <select
-          {...register("applicationMethod")}
-          className="w-full px-4 py-3 text-sm sm:text-base border rounded-md"
-        >
-          {Object.values(Method).map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
+      {/* Dynamic interview date fields */}
+      {interviewRound > 0 && (
+        <div className="space-y-2">
+          {Array.from({ length: interviewRound }).map((_, i) => (
+            <Fragment key={i}>
+              <label className="block text-sm font-medium mb-1">
+                Interview {i + 1} Date
+              </label>
+              <input
+                type="date"
+                {...register(`interviewDates.${i}`)}
+                className="w-full px-4 py-2 border rounded-md"
+              />
+            </Fragment>
           ))}
-        </select>
+        </div>
+      )}
+
+      {/* Select dropdowns */}
+      {[
+        {
+          name: "applicationMethod",
+          options: Method,
+        },
+        {
+          name: "applicationStatus",
+          options: STATUS,
+        },
+        { name: "platform", options: PLATFORM },
+      ].map(({ name, options }) => (
+        <div key={name}>
+          <label className="block text-sm font-medium mb-1 capitalize">
+            {name}
+          </label>
+          <select
+            {...register(name as keyof ApplicationFormData)}
+            className="w-full px-4 py-3 border rounded-md"
+          >
+            {Object.values(options).map((val) => (
+              <option key={val} value={val}>
+                {val}
+              </option>
+            ))}
+          </select>
+        </div>
+      ))}
+
+      {/* Markdown‐friendly textareas */}
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Job Description (Markdown supported)
+        </label>
+        <textarea
+          {...register("jobDescription")}
+          className="w-full px-4 py-3 border rounded-md min-h-[100px] font-mono"
+          placeholder="Job Description…"
+        />
       </div>
 
       <div>
-        <label className="block text-sm sm:text-base font-medium mb-1">
-          Application Status
-        </label>
-        <select
-          {...register("applicationStatus")}
-          className="w-full px-4 py-3 text-sm sm:text-base border rounded-md"
-        >
-          {Object.values(STATUS).map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm sm:text-base font-medium mb-1">
-          Platform
-        </label>
-        <select
-          {...register("platform")}
-          className="w-full px-4 py-3 text-sm sm:text-base border rounded-md"
-        >
-          {Object.values(PLATFORM).map((p) => (
-            <option key={p} value={p}>
-              {p}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm sm:text-base font-medium mb-1">
-          Notes
+        <label className="block text-sm font-medium mb-1">
+          Notes (Markdown supported)
         </label>
         <textarea
           {...register("notes")}
-          className="w-full px-4 py-3 text-sm sm:text-base border rounded-md min-h-[100px]"
+          className="w-full px-4 py-3 border rounded-md min-h-[100px] font-mono"
+          placeholder="E.g. _waiting for feedback_, **technical round** done…"
         />
       </div>
 

@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@/generated/prisma";
-import { STATUS } from "@/generated/prisma";
+import { Prisma, STATUS } from "@/generated/prisma";
 
 const PAGE_SIZE = 10;
 
@@ -113,10 +112,27 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
+  const applicationDate = new Date(body.applicationDate);
+  const interviewDates = (body.interviewDates || []).map(
+    (d: string) => new Date(d)
+  );
+
   const newApp = await prisma.application.create({
     data: {
-      ...body,
       userId: user.id,
+      jobTitle: body.jobTitle,
+      companyName: body.companyName,
+      applicationDate,
+      location: body.location,
+      contactPerson: body.contactPerson ?? null,
+      applicationMethod: body.applicationMethod,
+      applicationStatus: body.applicationStatus,
+      platform: body.platform,
+      interviewRound: body.interviewRound,
+      notes: body.notes ?? null,
+      jobLink: body.jobLink ?? null,
+      jobDescription: body.jobDescription ?? null,
+      interviewDates,
     },
   });
 

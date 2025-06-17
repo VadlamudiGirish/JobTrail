@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Application } from "@/types/application";
+import { toUTCDate } from "@/utils/date";
 
 async function getUserId() {
   const session = await getServerSession(authOptions);
@@ -38,29 +38,19 @@ export async function PUT(
 ) {
   const { id } = await context.params;
   const userId = await getUserId();
-  if (!userId) {
+  if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
-  const existing = await prisma.application.findUnique({
-    where: { id },
-    select: { userId: true },
-  });
-  if (!existing || existing.userId !== userId) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-
-  const body = (await request.json()) as Application;
-  const { applicationDate, ...rest } = body;
-
-  const normalizedDate = new Date(applicationDate);
-  normalizedDate.setHours(0, 0, 0, 0);
+  const body = await request.json();
+  const { applicationDate, interviewDates, interviewRound, ...rest } = body;
 
   const updated = await prisma.application.update({
     where: { id },
     data: {
       ...rest,
-      applicationDate: normalizedDate.toISOString(),
+      interviewRound: Number(interviewRound),
+      applicationDate: toUTCDate(applicationDate),
+      interviewDates: interviewDates?.map(toUTCDate) ?? [],
     },
   });
 
