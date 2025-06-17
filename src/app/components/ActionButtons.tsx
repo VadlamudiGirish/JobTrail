@@ -38,7 +38,6 @@ export default function ActionButtons({ id, locale }: ActionButtonsProps) {
     await mutate<CacheData>(
       (key) => typeof key === "string" && key.startsWith("/api/applications?"),
       (cached) => {
-        // if we didn’t have a list cache yet, bail
         if (!cached || !Array.isArray(cached.applications)) {
           return cached;
         }
