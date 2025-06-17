@@ -22,7 +22,12 @@ const ApplicationFormSchema = z.object({
     .min(0, "Interview round cannot be negative"),
   contactPerson: z.string().optional(),
   notes: z.string().optional(),
-  jobLink: z.string().url().optional(),
+  jobLink: z
+    .string()
+    .trim()
+    .url("Must be a valid URL")
+    .optional()
+    .or(z.literal("")),
   jobDescription: z.string().optional(),
   interviewDates: z.array(z.string().min(1, "Date required")).optional(),
 });
@@ -55,7 +60,6 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
   const [error, setError] = useState("");
   const interviewRound = watch("interviewRound");
 
-  // Keep the interviewDates array length in sync with interviewRound
   useEffect(() => {
     const current = watch("interviewDates") || [];
     const expanded = Array.from(
@@ -65,7 +69,6 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
     setValue("interviewDates", expanded);
   }, [interviewRound, setValue, watch]);
 
-  // On mount or when initialData changes, set all date inputs via UTC
   useEffect(() => {
     if (initialData?.applicationDate) {
       const formatted = toUTCDate(initialData.applicationDate)
@@ -101,7 +104,6 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
         {initialData ? "Edit Application" : "New Application"}
       </h1>
 
-      {/* Basic text/date/number inputs */}
       {[
         { name: "jobTitle", label: "Job Title", type: "text" },
         {
@@ -148,7 +150,6 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
         </div>
       ))}
 
-      {/* Dynamic interview date fields */}
       {interviewRound > 0 && (
         <div className="space-y-2">
           {Array.from({ length: interviewRound }).map((_, i) => (
@@ -166,7 +167,6 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
         </div>
       )}
 
-      {/* Select dropdowns */}
       {[
         {
           name: "applicationMethod",
@@ -195,7 +195,6 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
         </div>
       ))}
 
-      {/* Markdown‐friendly textareas */}
       <div>
         <label className="block text-sm font-medium mb-1">
           Job Description (Markdown supported)
