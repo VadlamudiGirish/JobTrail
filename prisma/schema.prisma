@@ -51,7 +51,7 @@ enum STATUS {
 }
 
 model Application {
-  id                String   @id @default(uuid())
+  id                String     @id @default(uuid())
   applicationDate   DateTime
   companyName       String
   jobTitle          String
@@ -61,11 +61,14 @@ model Application {
   location          String
   platform          PLATFORM
   interviewRound    Int
+  interviewDates    DateTime[]
+  jobLink           String?
+  jobDescription    String?
   notes             String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
   userId            String
-  user              User     @relation(fields: [userId], references: [id])
+  user              User       @relation(fields: [userId], references: [id])
 }
 
 model Account {

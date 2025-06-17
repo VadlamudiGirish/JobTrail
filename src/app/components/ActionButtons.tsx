@@ -26,20 +26,21 @@ export default function ActionButtons({ id, locale }: ActionButtonsProps) {
       return;
     }
 
-    const res = await fetch(`/api/applications/${id}`, {
-      method: "DELETE",
-    });
-
+    const res = await fetch(`/api/applications/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      const payload = await res.json().catch(() => ({} as { error?: string }));
-      alert(payload.error ?? "Failed to delete");
+      const { error } = (await res.json().catch(() => ({}))) as {
+        error?: string;
+      };
+      alert(error ?? "Failed to delete");
       return;
     }
 
     await mutate<CacheData>(
-      (key) => typeof key === "string" && key.startsWith("/api/applications"),
+      (key) => typeof key === "string" && key.startsWith("/api/applications?"),
       (cached) => {
-        if (!cached) return cached;
+        if (!cached || !Array.isArray(cached.applications)) {
+          return cached;
+        }
         return {
           ...cached,
           total: Math.max(0, cached.total - 1),
@@ -62,7 +63,6 @@ export default function ActionButtons({ id, locale }: ActionButtonsProps) {
           Edit
         </Button>
       </Link>
-
       <Button
         variant="secondary"
         onClick={(e) => {

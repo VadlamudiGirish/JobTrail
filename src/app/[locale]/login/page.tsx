@@ -22,13 +22,13 @@ export default function LoginPage() {
         <div className="text-center">
           <Image
             src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-            alt="JobTrail"
+            alt="ApplicationTrail"
             width={48}
             height={48}
             className="mx-auto mb-2"
           />
           <h1 className="text-2xl font-bold text-gray-900">
-            Welcome to JobTrail
+            Welcome to ApplicationTrail
           </h1>
           <p className="text-sm text-gray-600">Please sign in to continue</p>
         </div>

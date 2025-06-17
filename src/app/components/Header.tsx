@@ -31,10 +31,10 @@ export default function Header() {
       >
         <div className="flex items-center gap-x-12">
           <div className="-m-1.5 p-1.5">
-            <span className="sr-only">JobTrail</span>
+            <span className="sr-only">ApplicationTrail</span>
             <Image
               src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-              alt="JobTrail Logo"
+              alt="ApplicationTrail Logo"
               width={32}
               height={32}
               className="h-6 w-auto"
@@ -102,7 +102,7 @@ export default function Header() {
             <div className="-m-1.5 p-1.5">
               <Image
                 src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-                alt="JobTrail Logo"
+                alt="ApplicationTrail Logo"
                 width={32}
                 height={32}
                 className="h-6 w-auto"

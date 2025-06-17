@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Button from "@/app/components/Button";
 import ActionButtons from "@/app/components/ActionButtons";
 import type { Metadata } from "next";
+import ReactMarkdown from "react-markdown";
 
 export const metadata: Metadata = {
   title: "Application Details",
@@ -48,22 +49,66 @@ export default async function ApplicationDetailPage({
           <strong>Location:</strong> {application.location}
         </div>
         <div>
-          <strong>Status:</strong> {application.applicationStatus}
-        </div>
-        <div>
-          <strong>Platform:</strong> {application.platform}
-        </div>
-        <div>
-          <strong>Method:</strong> {application.applicationMethod}
-        </div>
-        <div>
           <strong>Contact Person:</strong> {application.contactPerson || "—"}
         </div>
         <div>
           <strong>Interview Round:</strong> {application.interviewRound}
         </div>
+
+        {Array.isArray(application.interviewDates) &&
+          application.interviewDates.length > 0 && (
+            <div>
+              <strong>Interview Dates:</strong>
+              <ul className="list-disc list-inside mt-1">
+                {application.interviewDates.map((date, index) => (
+                  <li key={index}>{new Date(date).toLocaleDateString()}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
         <div>
-          <strong>Notes:</strong> {application.notes || "—"}
+          <strong>Application Method:</strong> {application.applicationMethod}
+        </div>
+        <div>
+          <strong>Application Status:</strong> {application.applicationStatus}
+        </div>
+        <div>
+          <strong>Platform:</strong> {application.platform}
+        </div>
+
+        {application.jobLink && (
+          <div>
+            <strong>Job Link:</strong>{" "}
+            <a
+              href={application.jobLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline break-words"
+            >
+              {application.jobLink}
+            </a>
+          </div>
+        )}
+
+        {application.jobDescription && (
+          <div>
+            <strong>Job Description:</strong>
+            <div className="prose prose-sm mt-1 max-w-none">
+              <ReactMarkdown>{application.jobDescription}</ReactMarkdown>
+            </div>
+          </div>
+        )}
+
+        <div>
+          <strong>Notes:</strong>
+          {application.notes ? (
+            <div className="prose prose-sm mt-1 max-w-none">
+              <ReactMarkdown>{application.notes}</ReactMarkdown>
+            </div>
+          ) : (
+            " —"
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 pt-6">
