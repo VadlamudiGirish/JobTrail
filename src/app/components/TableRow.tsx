@@ -21,6 +21,9 @@ export default function TableRow({
       <td className="px-4 py-3 text-sm text-gray-800 break-words">
         {application.jobTitle}
       </td>
+      <td className="px-4 py-3 text-sm text-gray-800 break-words">
+        {application.companyName}
+      </td>
       <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
         {application.applicationStatus}
       </td>

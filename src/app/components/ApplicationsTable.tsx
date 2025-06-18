@@ -19,6 +19,9 @@ export default function ApplicationsTable({
               Job Title
             </th>
             <th className="px-4 py-3 text-left font-semibold whitespace-nowrap">
+              Company Name
+            </th>
+            <th className="px-4 py-3 text-left font-semibold whitespace-nowrap">
               Status
             </th>
             <th className="px-4 py-3 text-left font-semibold whitespace-nowrap">
