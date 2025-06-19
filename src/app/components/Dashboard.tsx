@@ -3,12 +3,7 @@
 import { useRouter } from "next/navigation";
 import StatsCard from "./StatsCard";
 import ChartPanel from "./ChartPanel";
-
-export interface DashboardPayload {
-  totals: { applied: number; interviewed: number; rejected: number };
-  byMonth: { month: string; count: number }[];
-  recent: { id: string; jobTitle: string; status: string }[];
-}
+import { DashboardPayload } from "@/types/dashboardPayload";
 
 interface DashboardProps {
   data?: DashboardPayload;
@@ -20,6 +15,7 @@ export default function Dashboard({ data }: DashboardProps) {
   const totals = data?.totals ?? { applied: 0, interviewed: 0, rejected: 0 };
   const byMonth = data?.byMonth ?? [];
   const recent = data?.recent ?? [];
+  const byLocation = data?.byLocation ?? [];
 
   if (!data) {
     return (
@@ -37,7 +33,7 @@ export default function Dashboard({ data }: DashboardProps) {
           <StatsCard label="Interviewed" count={totals.interviewed} />
           <StatsCard label="Rejected" count={totals.rejected} />
         </div>
-        <ChartPanel byMonth={byMonth} totals={totals} />
+        <ChartPanel byMonth={byMonth} totals={totals} byLocation={byLocation} />
       </div>
 
       <div>

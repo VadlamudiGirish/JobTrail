@@ -1,7 +1,8 @@
 "use client";
 
 import useSWR from "swr";
-import Dashboard, { DashboardPayload } from "@/app/components/Dashboard";
+import Dashboard from "@/app/components/Dashboard";
+import { DashboardPayload } from "@/types/dashboardPayload";
 
 export default function Home() {
   const { data, error } = useSWR<DashboardPayload>(

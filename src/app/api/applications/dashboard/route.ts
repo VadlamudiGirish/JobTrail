@@ -2,16 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-
-interface DashboardPayload {
-  totals: {
-    applied: number;
-    interviewed: number;
-    rejected: number;
-  };
-  byMonth: { month: string; count: number }[];
-  recent: { id: string; jobTitle: string; status: string }[];
-}
+import { DashboardPayload } from "@/types/dashboardPayload";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -37,34 +28,22 @@ export async function GET() {
     orderBy: { applicationDate: "desc" },
   });
 
-  const totals = {
-    applied: 0,
-    interviewed: 0,
-    rejected: 0,
-  };
-  all.forEach((a) => {
-    switch (a.applicationStatus) {
-      case "APPLIED":
-        totals.applied++;
-        break;
-      case "INTERVIEWED":
-        totals.interviewed++;
-        break;
-      case "REJECTED":
-        totals.rejected++;
-        break;
-    }
-  });
+  const totals = { applied: 0, interviewed: 0, rejected: 0 };
+  for (const a of all) {
+    if (a.applicationStatus === "APPLIED") totals.applied++;
+    else if (a.applicationStatus === "INTERVIEWED") totals.interviewed++;
+    else if (a.applicationStatus === "REJECTED") totals.rejected++;
+  }
 
   const byMonthMap = new Map<string, number>();
-  all.forEach((a) => {
+  for (const a of all) {
     const dt = new Date(a.applicationDate);
     const key = dt.toLocaleString("default", {
       month: "short",
       year: "numeric",
     });
     byMonthMap.set(key, (byMonthMap.get(key) || 0) + 1);
-  });
+  }
   const byMonth = Array.from(byMonthMap.entries())
     .sort(
       ([a], [b]) => new Date(a + " 1").getTime() - new Date(b + " 1").getTime()
@@ -77,6 +56,32 @@ export async function GET() {
     status: a.applicationStatus,
   }));
 
-  const payload: DashboardPayload = { totals, byMonth, recent };
+  let byLocation: { location: string; count: number }[] = [];
+  try {
+    const locationGroups = await prisma.application.groupBy({
+      by: ["location"],
+      _count: { location: true },
+      where: { userId: user.id },
+      orderBy: { _count: { location: "desc" } },
+    });
+    byLocation = locationGroups.map((g) => ({
+      location: g.location ?? "Unknown",
+      count: g._count.location,
+    }));
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      console.error("Error while grouping applications by Month", e.message);
+    } else {
+      console.error("Unknown error while grouping applications by Month");
+    }
+    byLocation = [];
+  }
+
+  const payload: DashboardPayload = {
+    totals,
+    byMonth,
+    recent,
+    byLocation,
+  };
   return NextResponse.json(payload);
 }
