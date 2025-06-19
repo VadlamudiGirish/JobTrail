@@ -18,8 +18,11 @@ const ApplicationFormSchema = z.object({
   applicationStatus: z.nativeEnum(STATUS),
   platform: z.nativeEnum(PLATFORM),
   interviewRound: z.coerce
-    .number()
-    .min(0, "Interview round cannot be negative"),
+    .number({
+      invalid_type_error: "Interview round must be a number",
+    })
+    .min(0, "Interview round cannot be less than 0")
+    .max(6, "Interview round cannot be greater than 6"),
   contactPerson: z.string().optional(),
   notes: z.string().optional(),
   jobLink: z
@@ -106,16 +109,8 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
 
       {[
         { name: "jobTitle", label: "Job Title", type: "text" },
-        {
-          name: "companyName",
-          label: "Company Name",
-          type: "text",
-        },
-        {
-          name: "applicationDate",
-          label: "Application Date",
-          type: "date",
-        },
+        { name: "companyName", label: "Company Name", type: "text" },
+        { name: "applicationDate", label: "Application Date", type: "date" },
         { name: "location", label: "Location", type: "text" },
         {
           name: "contactPerson",
@@ -128,11 +123,6 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
           label: "Job Link",
           type: "url",
           optional: true,
-        },
-        {
-          name: "interviewRound",
-          label: "Interview Round",
-          type: "number",
         },
       ].map(({ name, label, type, optional }) => (
         <div key={name}>
@@ -150,6 +140,24 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
         </div>
       ))}
 
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Interview Round
+        </label>
+        <input
+          type="number"
+          min={0}
+          max={6}
+          {...register("interviewRound", { valueAsNumber: true })}
+          className="w-full px-4 py-3 border rounded-md"
+        />
+        {errors.interviewRound && (
+          <p className="text-red-500 text-xs mt-1">
+            {errors.interviewRound.message}
+          </p>
+        )}
+      </div>
+
       {interviewRound > 0 && (
         <div className="space-y-2">
           {Array.from({ length: interviewRound }).map((_, i) => (
@@ -159,7 +167,7 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
               </label>
               <input
                 type="date"
-                {...register(`interviewDates.${i}`)}
+                {...register(`interviewDates.${i}` as const)}
                 className="w-full px-4 py-2 border rounded-md"
               />
             </Fragment>
@@ -180,7 +188,7 @@ export default function ApplicationForm({ initialData, onSubmit }: Props) {
       ].map(({ name, options }) => (
         <div key={name}>
           <label className="block text-sm font-medium mb-1 capitalize">
-            {name}
+            {name.replace(/([A-Z])/g, " $1")}
           </label>
           <select
             {...register(name as keyof ApplicationFormData)}
